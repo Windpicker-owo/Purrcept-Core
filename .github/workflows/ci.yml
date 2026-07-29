@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - run: uv sync --all-groups
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pyright
+      - run: uv run pytest --cov=purrcept_core --cov-report=term-missing
+      - name: Run examples
+        run: |
+          uv run python examples/01_inline_effect.py
+          uv run python examples/02_declarative_effect.py
+          uv run python examples/03_error_recovery.py
+          uv run python examples/04_nested_flow.py
+          uv run python examples/05_progress_events.py
+          uv run python examples/06_model_conversation.py
+      - if: matrix.python-version == '3.11'
+        name: Run external extension-package example
+        run: >-
+          uv run
+          --with-editable .
+          --with-editable ./examples/plugin_package
+          python examples/plugin_package/demo.py
+      - if: matrix.python-version == '3.11'
+        name: Build Core and extension distributions
+        run: |
+          uv build
+          uv build --project ./examples/plugin_package --out-dir ./dist/plugin_package
+      - if: matrix.python-version == '3.11'
+        name: Install wheels in a clean environment
+        run: |
+          uv venv --python 3.11 .wheel-venv
+          uv pip install --python .wheel-venv/bin/python \
+            dist/purrcept_core-0.3.0-py3-none-any.whl \
+            dist/plugin_package/purrcept_demo_plugin-0.3.0-py3-none-any.whl
+          uv pip check --python .wheel-venv/bin/python
+          .wheel-venv/bin/python -c "from importlib.resources import files; assert files('purrcept_core').joinpath('py.typed').is_file()"
+          .wheel-venv/bin/python examples/plugin_package/demo.py
+      - if: matrix.python-version == '3.11'
+        name: Install source distributions in a clean environment
+        run: |
+          uv venv --python 3.11 .sdist-venv
+          uv pip install --python .sdist-venv/bin/python \
+            dist/purrcept_core-0.3.0.tar.gz
+          uv pip install --python .sdist-venv/bin/python \
+            dist/plugin_package/purrcept_demo_plugin-0.3.0.tar.gz
+          uv pip check --python .sdist-venv/bin/python
+          .sdist-venv/bin/python -c "from importlib.resources import files; assert files('purrcept_core').joinpath('py.typed').is_file()"
+          .sdist-venv/bin/python examples/plugin_package/demo.py

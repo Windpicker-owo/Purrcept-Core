@@ -1,0 +1,82 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "purrcept_core"
+version = "0.5.0"
+description = "A Python-native, effect-driven, runtime-agnostic agent core."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+  { name = "Purrcept contributors" },
+]
+keywords = ["agents", "effects", "generators", "orchestration"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Typing :: Typed",
+]
+dependencies = [
+  "pydantic>=2.12,<3",
+]
+
+[dependency-groups]
+dev = [
+  "build>=1.2.2",
+  "coverage[toml]>=7.6",
+  "pyright>=1.1.390",
+  "pytest>=8.3",
+  "pytest-asyncio>=0.24",
+  "pytest-cov>=6",
+  "ruff>=0.9",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/purrcept_core"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers"
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["purrcept_core"]
+
+[tool.coverage.report]
+exclude_also = [
+  "if TYPE_CHECKING:",
+  "@overload",
+  "raise NotImplementedError",
+  "\\.\\.\\.",
+]
+fail_under = 100
+show_missing = true
+skip_covered = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["ASYNC", "B", "E", "F", "I", "RUF", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B017"]
+"examples/**" = ["ASYNC230"]
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.pyright]
+include = ["src", "typing_samples", "examples"]
+extraPaths = ["src", "examples/plugin_package/src"]
+pythonVersion = "3.11"
+typeCheckingMode = "strict"
+reportUnnecessaryTypeIgnoreComment = "error"

@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200"
+     height="520"
+     viewBox="0 0 1200 520"
+     role="img"
+     aria-labelledby="architecture-title architecture-desc">
+  <title id="architecture-title">Purrcept Core execution and ownership model</title>
+  <desc id="architecture-desc">
+    A Flow yields one Effect to an Executor, which sends a value or throws an error back.
+    AgentDriver advances the run and emits lifecycle events. Conversation expresses model
+    generation and tool invocation as the same observable Effects, while the Runtime owns
+    provider clients, credentials, resources, persistence, and scheduling outside Core.
+  </desc>
+
+  <defs>
+    <linearGradient id="architecture-blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4A9BFF"/>
+      <stop offset="1" stop-color="#2D75F2"/>
+    </linearGradient>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5FA4FF"/>
+    </marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8094B4"/>
+    </marker>
+  </defs>
+
+  <rect x="1" y="1" width="1198" height="518" rx="30"
+        fill="#0E1D36" stroke="#203858" stroke-width="2"/>
+
+  <g id="heading" transform="translate(58 48)">
+    <text x="0" y="0"
+          fill="#7F96B8"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="18" font-weight="700" letter-spacing="2">THE EXECUTION MODEL</text>
+    <text x="0" y="50"
+          fill="#FFFFFF"
+          font-family="-apple-system, BlinkMacSystemFont, Segoe UI, PingFang SC, sans-serif"
+          font-size="42" font-weight="720">One run. Every step explicit.</text>
+    <path d="M757 -8 C767 -11 773 -19 776 -32 C779 -19 785 -11 796 -8
+             C785 -5 779 3 776 16 C773 3 767 -5 757 -8 Z"
+          fill="#FF6F91"/>
+  </g>
+
+  <g id="kernel" transform="translate(58 142)">
+    <rect x="0" y="0" width="748" height="192" rx="24"
+          fill="#122644" stroke="#2B466B"/>
+    <text x="26" y="34"
+          fill="#8EA4C3"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="17" font-weight="700">GENERIC EFFECT KERNEL</text>
+
+    <g transform="translate(25 61)">
+      <rect x="0" y="0" width="180" height="82" rx="18"
+            fill="#15345D" stroke="#4E9BFF" stroke-width="2"/>
+      <text x="90" y="35" text-anchor="middle"
+            fill="#75B3FF"
+            font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="23" font-weight="750">FLOW</text>
+      <text x="90" y="61" text-anchor="middle"
+            fill="#C2D3EA"
+            font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+            font-size="18">order + branching</text>
+
+      <path d="M190 41 H245" fill="none" stroke="#5FA4FF" stroke-width="2"
+            marker-end="url(#arrow-blue)"/>
+      <text x="217" y="28" text-anchor="middle"
+            fill="#8FA6C5"
+            font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="16">yield</text>
+
+      <rect x="255" y="0" width="180" height="82" rx="18"
+            fill="#172B48" stroke="#8094B4" stroke-width="2"/>
+      <text x="345" y="35" text-anchor="middle"
+            fill="#FFFFFF"
+            font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="23" font-weight="750">EFFECT</text>
+      <text x="345" y="61" text-anchor="middle"
+            fill="#C2D3EA"
+            font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+            font-size="18">one typed intent</text>
+
+      <path d="M445 41 H500" fill="none" stroke="#5FA4FF" stroke-width="2"
+            marker-end="url(#arrow-blue)"/>
+
+      <rect x="510" y="0" width="188" height="82" rx="18"
+            fill="url(#architecture-blue)"/>
+      <text x="604" y="35" text-anchor="middle"
+            fill="#FFFFFF"
+            font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="23" font-weight="750">EXECUTOR</text>
+      <text x="604" y="61" text-anchor="middle"
+            fill="#EAF3FF"
+            font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+            font-size="18">performs the step</text>
+
+      <path d="M603 93 C603 126 89 126 89 93"
+            fill="none" stroke="#8094B4" stroke-width="2"
+            marker-end="url(#arrow-muted)"/>
+      <text x="346" y="122" text-anchor="middle"
+            fill="#92A8C7"
+            font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+            font-size="17">send(value) / throw(error)</text>
+    </g>
+  </g>
+
+  <g id="driver" transform="translate(58 354)">
+    <rect x="0" y="0" width="748" height="106" rx="22"
+          fill="#101F38" stroke="#2B466B"/>
+    <rect x="24" y="24" width="184" height="58" rx="16"
+          fill="#1A2F50" stroke="#496787"/>
+    <text x="116" y="59" text-anchor="middle"
+          fill="#FFFFFF"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="21" font-weight="750">AGENT DRIVER</text>
+    <text x="236" y="45"
+          fill="#C2D3EA"
+          font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+          font-size="18">advances the run · honors cancellation</text>
+    <text x="236" y="72"
+          fill="#C2D3EA"
+          font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+          font-size="18">emits run / effect / progress events</text>
+  </g>
+
+  <g id="model-layer" transform="translate(830 142)">
+    <rect x="0" y="0" width="312" height="192" rx="24"
+          fill="#162842" stroke="#344E70"/>
+    <text x="24" y="34"
+          fill="#8EA4C3"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="17" font-weight="700">MODEL STANDARD LIBRARY</text>
+
+    <rect x="24" y="58" width="264" height="48" rx="14"
+          fill="#213A5D" stroke="#56779F"/>
+    <text x="156" y="89" text-anchor="middle"
+          fill="#FFFFFF"
+          font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+          font-size="21" font-weight="650">Conversation</text>
+
+    <rect x="24" y="123" width="122" height="44" rx="13"
+          fill="#15345D" stroke="#4E9BFF"/>
+    <text x="85" y="151" text-anchor="middle"
+          fill="#75B3FF"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="18" font-weight="700">GENERATE</text>
+
+    <rect x="166" y="123" width="122" height="44" rx="13"
+          fill="#3B2338" stroke="#C95A78"/>
+    <text x="227" y="151" text-anchor="middle"
+          fill="#FF9AB2"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="18" font-weight="700">INVOKE TOOL</text>
+  </g>
+
+  <path d="M830 238 H794" fill="none" stroke="#5FA4FF" stroke-width="2"
+        marker-end="url(#arrow-blue)"/>
+  <text x="812" y="224" text-anchor="middle"
+        fill="#8FA6C5"
+        font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+        font-size="16">Effects</text>
+
+  <g id="runtime-boundary" transform="translate(830 354)">
+    <rect x="0" y="0" width="312" height="106" rx="22"
+          fill="#271D31" stroke="#6C4961"/>
+    <text x="24" y="34"
+          fill="#FF91AD"
+          font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+          font-size="18" font-weight="750">RUNTIME OWNS REALITY</text>
+    <text x="24" y="62"
+          fill="#E6C9D3"
+          font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+          font-size="17">clients · credentials · resources</text>
+    <text x="24" y="86"
+          fill="#E6C9D3"
+          font-family="-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif"
+          font-size="17">persistence · scheduling · policy</text>
+  </g>
+</svg>
