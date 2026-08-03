@@ -41,6 +41,7 @@ def test_models_public_api_is_available_from_the_subpackage() -> None:
         "ReminderState",
         "RenderPolicy",
         "RequestTokenBudget",
+        "ReasoningBlock",
         "SlidingWindowContext",
         "SystemInstruction",
         "SystemReminder",

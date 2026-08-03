@@ -1,9 +1,10 @@
 """Define immutable provider-neutral blocks used in messages and tool exchange.
 
 Core request and response values compose these blocks without assuming a
-provider wire format. The built-ins cover text, images, tool calls, and tool
-results. Provider or application extensions may subclass :class:`ContentBlock`,
-but conversion to a provider payload remains the backend's responsibility.
+provider wire format. The built-ins cover visible text, hidden model reasoning,
+images, tool calls, and tool results. Provider or application extensions may
+subclass :class:`ContentBlock`, but conversion to a provider payload remains
+the backend's responsibility.
 """
 
 from __future__ import annotations
@@ -35,6 +36,27 @@ class ContentBlock:
 @dataclass(frozen=True, slots=True)
 class TextBlock(ContentBlock):
     """Plain text content."""
+
+    text: str
+
+    def __post_init__(self) -> None:
+        _validate_text(self.text)
+
+
+@dataclass(frozen=True, slots=True)
+class ReasoningBlock(ContentBlock):
+    """Hidden assistant reasoning that may be replayed to a thinking model.
+
+    Backends create this block from a provider's structured reasoning field,
+    and conversation checkpoints may retain it so a later request can reproduce
+    the provider's exact assistant turn. It is deliberately distinct from
+    :class:`TextBlock`: user interfaces, ``Message.text``, world projections,
+    and ordinary application logs must not expose it as visible assistant text.
+
+    The value contains only the model-returned reasoning text. Opaque provider
+    cursors, signatures, and transport state remain ``ModelContinuation`` data
+    and are governed by their separate persistence policy.
+    """
 
     text: str
 
@@ -146,6 +168,7 @@ __all__ = [
     "ImageBlock",
     "ImageBytes",
     "ImageUrl",
+    "ReasoningBlock",
     "TextBlock",
     "ToolCallBlock",
     "ToolResultBlock",

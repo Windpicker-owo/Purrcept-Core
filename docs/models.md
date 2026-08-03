@@ -547,7 +547,10 @@ message = Message(
 )
 ```
 
-公共 block 包括 `TextBlock`、`ImageBlock`、`ToolCallBlock` 和 `ToolResultBlock`。
+公共 block 包括 `TextBlock`、`ReasoningBlock`、`ImageBlock`、`ToolCallBlock` 和
+`ToolResultBlock`。`ReasoningBlock` 保存模型返回的隐藏推理文本，使后续请求可以按
+供应商协议回传完整 assistant turn；它不会被 `Message.text` 投影为可见文本，也不应
+由界面、世界投影或普通日志展示。
 `Message.user()`、`Message.assistant()`、`Message.from_text()` 与 `Message.tool()` 提供
 常用构造方式；`Message.text` 拼接可见文本。
 

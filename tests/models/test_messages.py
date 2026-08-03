@@ -4,7 +4,13 @@ from dataclasses import FrozenInstanceError
 
 import pytest
 
-from purrcept_core.models.content import ImageBlock, ImageUrl, TextBlock, ToolResultBlock
+from purrcept_core.models.content import (
+    ImageBlock,
+    ImageUrl,
+    ReasoningBlock,
+    TextBlock,
+    ToolResultBlock,
+)
 from purrcept_core.models.messages import Message, MessageRole
 
 
@@ -47,6 +53,17 @@ def test_text_factories_create_each_message_role() -> None:
     assert from_text == Message.assistant("again")
     assert {role.value for role in MessageRole} == {"user", "assistant", "tool"}
     assert not hasattr(Message, "system")
+
+
+def test_message_text_never_projects_hidden_reasoning() -> None:
+    """A retained reasoning turn must not become visible application output."""
+
+    message = Message(
+        MessageRole.ASSISTANT,
+        (ReasoningBlock("private reasoning"), TextBlock("visible answer")),
+    )
+
+    assert message.text == "visible answer"
 
 
 def test_tool_factory_accepts_text_and_content_iterables() -> None:

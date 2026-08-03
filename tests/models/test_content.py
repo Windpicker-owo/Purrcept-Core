@@ -9,6 +9,7 @@ from purrcept_core.models.content import (
     ImageBlock,
     ImageBytes,
     ImageUrl,
+    ReasoningBlock,
     TextBlock,
     ToolCallBlock,
     ToolResultBlock,
@@ -22,6 +23,7 @@ class CustomBlock(ContentBlock):
 
 def test_content_blocks_are_extensible_immutable_value_objects() -> None:
     text = TextBlock("hello")
+    reasoning = ReasoningBlock("private model reasoning")
     image_url = ImageUrl("https://example.test/cat.png")
     image_bytes = ImageBytes(b"cat", "image/png")
     remote_image = ImageBlock(image_url, alt_text="a cat")
@@ -42,6 +44,7 @@ def test_content_blocks_are_extensible_immutable_value_objects() -> None:
     assert result.is_error is True
     with pytest.raises(FrozenInstanceError):
         text.text = "changed"  # type: ignore[misc]
+    assert reasoning.text == "private model reasoning"
 
 
 def test_tool_arguments_are_deeply_copied_and_frozen() -> None:
@@ -131,6 +134,7 @@ def test_json_freezing_rejects_mapping_and_sequence_cycles() -> None:
     ("factory", "error_type", "match"),
     [
         (lambda: TextBlock(1), TypeError, "text must be a string"),
+        (lambda: ReasoningBlock(1), TypeError, "text must be a string"),
         (lambda: ImageUrl(1), TypeError, "url must be a string"),
         (lambda: ImageUrl(""), ValueError, "url must not be empty"),
         (lambda: ImageBytes(bytearray(b"x"), "image/png"), TypeError, "data must be bytes"),

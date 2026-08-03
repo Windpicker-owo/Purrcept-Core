@@ -453,6 +453,7 @@ ContentBlock
 Message
 MessageRole: user / assistant / tool
 TextBlock
+ReasoningBlock
 ImageBlock
 ImageUrl
 ImageBytes
