@@ -27,7 +27,12 @@ class ReminderScope(StrEnum):
 
 
 class ReminderPlacement(StrEnum):
-    """Where a provider adapter should place a reminder."""
+    """Where a provider adapter should place a reminder relative to history.
+
+    Placement is position, not wire role. Reminders are request-local control
+    text; Chat Completions adapters must emit them as user messages.
+    ``SystemInstruction`` is the only system-role input.
+    """
 
     AUTO = "auto"
     INSTRUCTIONS = "instructions"
@@ -36,7 +41,11 @@ class ReminderPlacement(StrEnum):
 
 @dataclass(frozen=True, slots=True)
 class SystemReminder:
-    """Immutable guidance with explicit lifetime, placement, and ordering hints."""
+    """Immutable request-local guidance with lifetime, placement, and ordering.
+
+    Reminders never become canonical history. Adapters must not serialize them
+    as the system role; that role is reserved for ``SystemInstruction``.
+    """
 
     content: tuple[ContentBlock, ...]
     key: str | None = field(default=None, kw_only=True)

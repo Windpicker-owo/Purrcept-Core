@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented here.
 
+## Unreleased
+
+### Clarified
+
+- Reminder placement is position relative to history, not wire role. Provider
+  adapters must not serialize `SystemReminder` as the system role; that role is
+  reserved for `SystemInstruction`. Chat Completions adapters emit reminders as
+  user messages.
+
 ## 0.5.0 - 2026-07-28
 
 ### Added

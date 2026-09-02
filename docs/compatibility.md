@@ -194,6 +194,8 @@ request = ModelRequest(
 ```
 
 动态规则使用 `SystemReminder` 或 `conversation.remind()`，不要把它们追加为永久消息。
+Chat Completions 适配器必须把 reminder 发成 `user` 消息；`system` 只属于
+`SystemInstruction`。
 
 ### 5. 更新请求设置与工具描述
 

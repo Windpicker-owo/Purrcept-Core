@@ -439,9 +439,10 @@ PromptCachePolicy(
 `CacheMode` 包含 `AUTO`、`DISABLED`、`PREFER` 和 `EXPLICIT`。
 `PromptStability` 包含 `STABLE`、`GROWING` 和 `VOLATILE`。Core 将 instructions、
 messages 和 reminders 保持为分离语义，使 Provider Adapter 可以维持稳定前缀并把动态
-Reminder 放到合适位置。在供应商语义允许时，Adapter 应优先编译稳定 instructions、
-稳定 tool specs、不断增长的历史，最后再放当前输入和 volatile reminders；具体缓存
-机制、TTL 支持与严格模式处理仍由 Provider 决定。
+Reminder 放到合适位置。Chat Completions 适配器必须把 reminder 发成 user 消息：只有
+`SystemInstruction` 使用 system 角色。在供应商语义允许时，Adapter 应优先编译稳定
+instructions、稳定 tool specs、不断增长的历史，最后再放当前输入和 volatile
+reminders；具体缓存机制、TTL 支持与严格模式处理仍由 Provider 决定。
 
 `ModelContinuation(provider, data)` 保存 Provider 的不透明续接状态。Conversation 总会
 保留 Backend 返回的最新 continuation；默认 `CLIENT_MANAGED` 不把它放入下一次请求，

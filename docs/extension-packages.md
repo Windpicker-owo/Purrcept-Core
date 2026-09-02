@@ -75,7 +75,8 @@ Provider Adapter 负责：
 
 - 把 Message / ContentBlock 转换为供应商 wire format；
 - 映射 `SystemInstruction` 与已由 Core 排序的 `SystemReminder`，保持其顺序并尊重
-  placement 提示；
+  placement 提示。`SystemInstruction` 才是 system 角色；Chat Completions 适配器必须
+  把 reminder 发成 `user` 消息，不得并入 system 前缀；
 - 映射 `ToolSpec`、`ModelSettings` 和 tool-call/result 内容；
 - 解释 `PromptCachePolicy` 与 `ModelContinuation`；
 - 报告标准 `TokenUsage`，保留 `provider_metadata`；
