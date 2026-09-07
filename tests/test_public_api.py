@@ -7,7 +7,7 @@ import purrcept_core
 
 def test_package_name_and_version() -> None:
     assert purrcept_core.__name__ == "purrcept_core"
-    assert purrcept_core.__version__ == "0.5.0"
+    assert purrcept_core.__version__ == "0.5.1"
 
 
 def test_every_declared_public_name_is_available() -> None:

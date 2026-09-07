@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from typing import cast
 
 from ._utils import (
     JsonValue,
@@ -63,6 +64,33 @@ class TextDelta(ModelStreamEvent):
         _validate_index_type(self.index)
         if self.index < 0:
             raise ValueError("index must be greater than or equal to zero.")
+
+
+@dataclass(frozen=True, slots=True)
+class ReasoningDelta(ModelStreamEvent):
+    """Readable provider reasoning, kept separate from assistant answer text.
+
+    Backends emit only text the provider actually exposes, never opaque
+    signatures or encrypted continuation state. ``index`` identifies a block
+    within this reasoning channel; observers key it with the event type rather
+    than assuming it is an index into a subsequently normalized final message.
+    ``is_summary`` identifies provider-supplied summaries. These previews do not
+    commit conversation history or replace the final response's reasoning state.
+    """
+
+    delta: str
+    index: int = field(default=0, kw_only=True)
+    is_summary: bool = field(default=False, kw_only=True)
+
+    def __post_init__(self) -> None:
+        """Validate text and channel identity before observers retain the event."""
+
+        _validate_string(self.delta, field_name="delta")
+        _validate_index_type(self.index)
+        if self.index < 0:
+            raise ValueError("index must be greater than or equal to zero.")
+        if not isinstance(cast(object, self.is_summary), bool):
+            raise TypeError("is_summary must be a bool.")
 
 
 @dataclass(frozen=True, slots=True)
@@ -127,6 +155,7 @@ __all__ = [
     "ModelStreamCompleted",
     "ModelStreamEvent",
     "ModelStreamStarted",
+    "ReasoningDelta",
     "TextDelta",
     "ToolCallDelta",
     "UsageUpdate",

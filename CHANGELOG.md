@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+- Add `ReasoningDelta` as an immutable, separately indexed stream of provider-exposed
+  readable reasoning or summaries. It never contains opaque continuation state.
+- Restore the documented default of eight model rounds in both conversation factories;
+  the previous zero default contradicted the positive-round validator.
+
 ### Clarified
 
 - Reminder placement is position relative to history, not wire role. Provider

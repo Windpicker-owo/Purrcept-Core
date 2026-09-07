@@ -153,7 +153,7 @@ class Conversation:
         prompt_compiler: PromptCompiler | None = None,
         request_budget: RequestTokenBudget | None = None,
         prompt_trace_sink: PromptTraceSink | None = None,
-        max_model_rounds: int = 0,
+        max_model_rounds: int = 8,
         metadata: Mapping[str, JsonValue] | None = None,
         provider_options: Mapping[str, JsonValue] | None = None,
         state: ConversationState | None = None,
