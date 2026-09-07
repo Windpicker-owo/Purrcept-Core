@@ -15,7 +15,7 @@ exposed as part of the public contract.
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping
-from inspect import Parameter, Signature, signature
+from inspect import Parameter, Signature, isroutine, signature
 from typing import Annotated, Any, cast, get_args, get_origin, get_type_hints
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, create_model
@@ -107,11 +107,11 @@ class ArgumentAdapter:
 def _resolve_type_hints(function: _ToolCallable) -> Mapping[str, Any]:
     """Resolve annotations for a function or callable object's ``__call__``."""
 
-    try:
-        return get_type_hints(function, include_extras=True)
-    except TypeError:
-        call_method = cast(_ToolCallable, function.__call__)
-        return get_type_hints(call_method, include_extras=True)
+    # Compatibility: Python 3.14 can return an empty mapping for callable
+    # instances instead of raising TypeError. Resolve the method that owns
+    # their parameter annotations explicitly, independently of that behavior.
+    target = function if isroutine(function) else cast(_ToolCallable, function.__call__)
+    return get_type_hints(target, include_extras=True)
 
 
 def _definition_failure_detail(error: Exception) -> str:

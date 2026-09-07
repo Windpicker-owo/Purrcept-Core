@@ -8,6 +8,7 @@ and rejection of ambiguous callables.
 from __future__ import annotations
 
 import sys
+from collections.abc import Mapping
 from dataclasses import FrozenInstanceError
 from typing import Annotated, NotRequired, TypedDict, cast
 
@@ -349,6 +350,9 @@ def test_callable_objects_are_supported_when_given_an_explicit_name() -> None:
 
     assert function_tool.name == "multiply"
     assert function_tool.spec.parameters["required"] == ("value",)
+    properties = function_tool.spec.parameters["properties"]
+    assert isinstance(properties, Mapping)
+    assert properties["value"]["type"] == "integer"
 
 
 @pytest.mark.parametrize(

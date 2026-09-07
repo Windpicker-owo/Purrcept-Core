@@ -6,6 +6,8 @@ All notable changes to this project are documented here.
 
 ## 0.5.1 - 2026-09-08
 
+- Resolve callable instance annotations from `__call__` explicitly on Python 3.14,
+  preserving FunctionTool support across the advertised Python versions.
 - Publish validated wheel and source distributions automatically when a GitHub Release
   is published, using PyPI Trusted Publishing and an isolated publishing job.
 
