@@ -12,7 +12,7 @@ add a GitHub Trusted Publisher with these exact values:
 | Field | Value |
 | --- | --- |
 | Owner | `Windpicker-owo` |
-| Repository | `purrcept_core` |
+| Repository | `Purrcept-Core` |
 | Workflow | `publish.yml` |
 | Environment | `pypi` |
 
