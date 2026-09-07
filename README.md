@@ -31,7 +31,7 @@ prompts, function tools, streaming events, context policies, and backend conform
 taking ownership of provider clients, credentials, persistence, or the application runtime.
 
 > [!IMPORTANT]
-> `0.5.0` is an alpha release. The main development path is in place, but focused API changes
+> `0.5.1` is an alpha release. The main development path is in place, but focused API changes
 > may still follow real Provider and Runtime integration feedback before `1.0`.
 
 ## The execution model
@@ -239,9 +239,8 @@ arrive with focused tests and matching narrative documentation.
 
 ## Project status
 
-- Current version: `0.5.0` alpha.
+- Current version: `0.5.1` alpha.
 - Supported Python versions: `3.11`, `3.12`, `3.13`, and `3.14`.
 - Runtime dependency: Pydantic v2, used internally by function tools without entering the public
   model protocol.
-- Licensing and the public PyPI package name still require project-owner confirmation before a
-  public release.
+- Published on PyPI as `purrcept_core`. See [Releasing](RELEASING.md) for the automated release process.

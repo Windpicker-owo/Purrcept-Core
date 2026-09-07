@@ -31,7 +31,7 @@ Run。
 的所有权仍然留在 Core 之外。
 
 > [!IMPORTANT]
-> `0.5.0` 是 alpha 版本。默认开发路径已经形成，但在 `1.0` 前仍可能根据真实 Provider
+> `0.5.1` 是 alpha 版本。默认开发路径已经形成，但在 `1.0` 前仍可能根据真实 Provider
 > 与 Runtime 的集成反馈进行小范围 API 调整。
 
 ## 执行模型
@@ -233,7 +233,7 @@ uv build
 
 ## 项目状态
 
-- 当前版本：`0.5.0` alpha。
+- 当前版本：`0.5.1` alpha。
 - 支持的 Python 版本：`3.11`、`3.12`、`3.13` 与 `3.14`。
 - Runtime 依赖：Pydantic v2，仅在函数工具内部使用，不进入公共模型协议。
-- 公开发布前仍需由项目所有者确认许可证与公开 PyPI 包名。
+- 已在 PyPI 发布为 `purrcept_core`；自动发布流程见 [Releasing](RELEASING.md)。

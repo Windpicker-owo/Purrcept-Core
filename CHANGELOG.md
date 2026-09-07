@@ -4,6 +4,11 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+## 0.5.1 - 2026-09-08
+
+- Publish validated wheel and source distributions automatically when a GitHub Release
+  is published, using PyPI Trusted Publishing and an isolated publishing job.
+
 - Add `ReasoningDelta` as an immutable, separately indexed stream of provider-exposed
   readable reasoning or summaries. It never contains opaque continuation state.
 - Restore the documented default of eight model rounds in both conversation factories;

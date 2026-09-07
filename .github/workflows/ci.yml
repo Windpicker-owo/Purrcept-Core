@@ -47,8 +47,8 @@ jobs:
         run: |
           uv venv --python 3.11 .wheel-venv
           uv pip install --python .wheel-venv/bin/python \
-            dist/purrcept_core-0.3.0-py3-none-any.whl \
-            dist/plugin_package/purrcept_demo_plugin-0.3.0-py3-none-any.whl
+            dist/purrcept_core-*-py3-none-any.whl \
+            dist/plugin_package/purrcept_demo_plugin-*-py3-none-any.whl
           uv pip check --python .wheel-venv/bin/python
           .wheel-venv/bin/python -c "from importlib.resources import files; assert files('purrcept_core').joinpath('py.typed').is_file()"
           .wheel-venv/bin/python examples/plugin_package/demo.py
@@ -57,9 +57,9 @@ jobs:
         run: |
           uv venv --python 3.11 .sdist-venv
           uv pip install --python .sdist-venv/bin/python \
-            dist/purrcept_core-0.3.0.tar.gz
+            dist/purrcept_core-*.tar.gz
           uv pip install --python .sdist-venv/bin/python \
-            dist/plugin_package/purrcept_demo_plugin-0.3.0.tar.gz
+            dist/plugin_package/purrcept_demo_plugin-*.tar.gz
           uv pip check --python .sdist-venv/bin/python
           .sdist-venv/bin/python -c "from importlib.resources import files; assert files('purrcept_core').joinpath('py.typed').is_file()"
           .sdist-venv/bin/python examples/plugin_package/demo.py
