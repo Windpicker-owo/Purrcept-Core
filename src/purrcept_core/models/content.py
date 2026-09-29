@@ -2,7 +2,7 @@
 
 Core request and response values compose these blocks without assuming a
 provider wire format. The built-ins cover visible text, hidden model reasoning,
-images, tool calls, and tool results. Provider or application extensions may
+images, encoded audio, tool calls, and tool results. Provider or application extensions may
 subclass :class:`ContentBlock`, but conversion to a provider payload remains
 the backend's responsibility.
 """
@@ -31,6 +31,41 @@ class ContentBlock:
     """
 
     __slots__ = ()
+
+
+@dataclass(frozen=True, slots=True)
+class AudioBytes:
+    """Immutable encoded audio supplied by a caller, without device ownership.
+
+    The backend validates provider format support; applications own duration,
+    decoding, and resource budgets. Raw PCM must be wrapped in a container first.
+    """
+
+    data: bytes = field(repr=False)
+    media_type: str = "audio/wav"
+
+    def __post_init__(self) -> None:
+        if not isinstance(cast(object, self.data), bytes) or not self.data:
+            raise ValueError("Audio data must be nonempty immutable bytes.")
+        if self.media_type not in {"audio/wav", "audio/mpeg"}:
+            raise ValueError("Audio must use a WAV or MP3 container.")
+
+
+@dataclass(frozen=True, slots=True)
+class AudioBlock(ContentBlock):
+    """User audio evidence, distinct from text and generated speech output.
+
+    Messages retain the original immutable snapshot. A description identifies
+    the recording; it is not a transcript or evidence of model understanding.
+    """
+
+    source: AudioBytes
+    alt_text: str | None = field(default=None, kw_only=True)
+
+    def __post_init__(self) -> None:
+        if not isinstance(cast(object, self.source), AudioBytes):
+            raise TypeError("Audio source must be AudioBytes.")
+        validate_optional_non_empty_string(self.alt_text, field_name="alt_text")
 
 
 @dataclass(frozen=True, slots=True)
@@ -164,6 +199,8 @@ def _validate_is_error(value: object) -> None:
 
 
 __all__ = [
+    "AudioBlock",
+    "AudioBytes",
     "ContentBlock",
     "ImageBlock",
     "ImageBytes",

@@ -14,6 +14,8 @@ from .conformance import (
     run_backend_conformance,
 )
 from .content import (
+    AudioBlock,
+    AudioBytes,
     ContentBlock,
     ImageBlock,
     ImageBytes,
@@ -111,6 +113,8 @@ from .tools import (
 
 __all__ = [
     "AppendOnlyContext",
+    "AudioBlock",
+    "AudioBytes",
     "BackendConformanceCase",
     "BackendConformanceError",
     "BackendConformanceReport",
