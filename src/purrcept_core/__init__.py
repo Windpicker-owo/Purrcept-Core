@@ -48,7 +48,7 @@ from .run import (
     as_agent_run,
 )
 
-__version__ = "0.5.1"
+__version__ = "0.6.0"
 """Version of the public Purrcept Core API exposed by this package."""
 
 __all__ = [

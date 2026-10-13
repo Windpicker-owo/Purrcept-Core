@@ -5,6 +5,8 @@ from dataclasses import FrozenInstanceError, dataclass
 import pytest
 
 from purrcept_core.models.content import (
+    AudioBlock,
+    AudioBytes,
     ContentBlock,
     ImageBlock,
     ImageBytes,
@@ -14,6 +16,13 @@ from purrcept_core.models.content import (
     ToolCallBlock,
     ToolResultBlock,
 )
+
+
+def test_audio_source_must_be_encoded_bytes_value() -> None:
+    """Reject another modality rather than accepting its superficially similar shape."""
+    with pytest.raises(TypeError, match="AudioBytes"):
+        AudioBlock(ImageBytes(b"png", "image/png"))  # type: ignore[arg-type]
+    assert AudioBlock(AudioBytes(b"wav")).source.data == b"wav"
 
 
 @dataclass(frozen=True, slots=True)

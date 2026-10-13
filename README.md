@@ -1,4 +1,6 @@
 <p align="center">
+
+Decision models use the independent `DecisionModel / DecisionBackend / Decide` API for typed probabilities, choices, scores, and refusals. See [decision models](docs/decisions.md).
   <strong>English</strong> · <a href="./README.zh-CN.md">简体中文</a>
 </p>
 
@@ -31,7 +33,7 @@ prompts, function tools, streaming events, context policies, and backend conform
 taking ownership of provider clients, credentials, persistence, or the application runtime.
 
 > [!IMPORTANT]
-> `0.5.1` is an alpha release. The main development path is in place, but focused API changes
+> `0.6.0` is an alpha release. The main development path is in place, but focused API changes
 > may still follow real Provider and Runtime integration feedback before `1.0`.
 
 ## The execution model
@@ -239,7 +241,7 @@ arrive with focused tests and matching narrative documentation.
 
 ## Project status
 
-- Current version: `0.5.1` alpha.
+- Current version: `0.6.0` alpha.
 - Supported Python versions: `3.11`, `3.12`, `3.13`, and `3.14`.
 - Runtime dependency: Pydantic v2, used internally by function tools without entering the public
   model protocol.

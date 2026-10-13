@@ -7,9 +7,7 @@
 from pathlib import Path
 from purrcept_core.models import AudioBlock, AudioBytes, Message, MessageRole
 
-message = Message(MessageRole.USER, (
-    AudioBlock(AudioBytes(Path("utterance.wav").read_bytes())),
-))
+message = Message(MessageRole.USER, (AudioBlock(AudioBytes(Path("utterance.wav").read_bytes())),))
 ```
 
 Core owns no microphone, VAD, transcription, playback, or media storage. Applications

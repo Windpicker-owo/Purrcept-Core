@@ -4,6 +4,10 @@ All notable changes to this project are documented here.
 
 ## Unreleased
 
+- Add independent DecisionModel, DecisionBackend, and Decide APIs with immutable
+  text/image requests, predicate/choice/score answers, refusal, and request correspondence checks.
+- Document decision resource ownership and provider normalization boundaries.
+
 ## 0.5.1 - 2026-09-08
 
 - Resolve callable instance annotations from `__call__` explicitly on Python 3.14,

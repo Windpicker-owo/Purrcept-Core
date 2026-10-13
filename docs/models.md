@@ -1,5 +1,9 @@
 # 模型标准能力
 
+决策模型使用独立的 `DecisionModel / DecisionBackend / Decide`，支持文本、图片和三类
+类型化问题。详见[决策模型](decisions.md)，设计依据见
+[ADR 0007](../adr/0007-decision-models.md)。
+
 `purrcept_core.models` 是与通用 Effect/Run 内核同发行的 Agent 模型标准库。它不包含
 Provider SDK、网络 client、认证或传输实现，并同时服务两类使用者：
 

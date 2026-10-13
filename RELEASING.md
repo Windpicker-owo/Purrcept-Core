@@ -2,7 +2,7 @@
 
 Publishing a GitHub Release runs `.github/workflows/publish.yml`. Pushing a commit
 or tag alone does not publish to PyPI. The tag must exactly match `v` followed by
-`project.version` in `pyproject.toml`; this release is `v0.5.1`.
+`project.version` in `pyproject.toml`; this release is `v0.6.0`.
 
 ## One-time setup
 
