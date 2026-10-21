@@ -3,8 +3,9 @@
 The public facade supplies committed immutable state and validated reusable
 configuration to :func:`run_model_turn`. The generator builds provisional
 history, prepares and compiles each request, yields model generation, and
-executes requested tools in provider order. It returns a new committed state
-only after a final assistant response.
+executes requested tools in provider order. Applications can supply an intake
+effect to extend provisional history at response/request boundaries. It returns
+a new committed state after a final assistant response with no pending intake.
 
 This module never mutates the input state or the owning ``Conversation``.
 Failures, cancellation, and tool-loop limits unwind the generator without a
@@ -19,6 +20,7 @@ from dataclasses import dataclass, field
 from inspect import isawaitable
 from typing import TYPE_CHECKING, cast
 
+from ..effect import Effect
 from ..errors import PurrceptError
 from ..flow import AgentFlow, perform
 from ._utils import JsonValue
@@ -46,10 +48,10 @@ class ConversationBusyError(PurrceptError):
 
 
 class ToolLoopLimitError(PurrceptError):
-    """Raised before tools run when no model round remains for their results.
+    """Raised when tool results or new input require an unavailable model round.
 
     The last response is retained for diagnosis, but neither that response nor
-    its requested tools are committed to conversation history.
+    its requested tools or newly received input are committed to history.
     """
 
     def __init__(
@@ -130,12 +132,15 @@ def run_model_turn(
     metadata: Mapping[str, JsonValue],
     provider_options: Mapping[str, JsonValue],
     request_budget: RequestTokenBudget | None,
+    input_poll: Effect[tuple[Message, ...]] | None = None,
 ) -> AgentFlow[ModelTurnResult]:
     """Run one model/tool transaction and return a new immutable state.
 
     The caller must provide committed ``state`` and a user-role message. Model
     responses and tool results remain provisional until a response contains no
-    tool calls. Ordinary effect failures enter this generator through
+    tool calls and no new input is available. An optional application-owned
+    input effect is polled serially at response and request boundaries; it
+    must not wait for future arrivals. Ordinary effect failures enter this generator through
     ``perform`` and propagate unless application-level wrapping handles them.
     """
 
@@ -157,7 +162,8 @@ def run_model_turn(
     tool_results: list[ToolResult] = []
 
     for model_round in range(1, max_model_rounds + 1):
-        # Context selection and prompt compilation are repeated after each tool
+        working_messages.extend((yield from _poll_input(input_poll)))
+        # Context selection and prompt compilation are repeated after each
         # round so dynamic reminders and token budgets observe the latest
         # provisional transcript.
         provisional_state = _new_conversation_state(
@@ -211,7 +217,8 @@ def run_model_turn(
         working_messages.append(response.message)
         working_continuation = response.continuation
         calls = response.tool_calls
-        if not calls:
+        incoming = yield from _poll_input(input_poll)
+        if not calls and not incoming:
             # Commit point: one final assistant response closes the turn. The
             # new boundary includes the user message, every intermediate
             # assistant/tool pair, and this final response.
@@ -229,8 +236,8 @@ def run_model_turn(
             )
 
         if model_round == max_model_rounds:
-            # Ordering: reject before invoking tools because their results could
-            # never be delivered to another model round.
+            # Ordering: reject before invoking tools because neither their
+            # results nor new input could be delivered to another model round.
             raise ToolLoopLimitError(
                 max_model_rounds,
                 last_response=response,
@@ -250,7 +257,28 @@ def run_model_turn(
                 )
             )
 
+        # Ordering: intake happens immediately after the assistant response,
+        # but tool calls keep their matching results together on the wire.
+        # Received input cannot revoke calls already selected by the model.
+        working_messages.extend(incoming)
+
     raise AssertionError("unreachable model loop state")
+
+
+def _poll_input(effect: Effect[tuple[Message, ...]] | None) -> AgentFlow[tuple[Message, ...]]:
+    """Validate application-supplied messages before changing provisional history."""
+    if effect is None:
+        return ()
+    value = cast(object, (yield from perform(effect)))
+    if not isinstance(value, tuple):
+        raise TypeError("input_poll must return a tuple of user Messages.")
+    messages = cast(tuple[object, ...], value)
+    if any(
+        not isinstance(message, Message) or message.role is not MessageRole.USER
+        for message in messages
+    ):
+        raise TypeError("input_poll must return a tuple of user Messages.")
+    return cast(tuple[Message, ...], messages)
 
 
 def _new_conversation_state(

@@ -20,6 +20,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from typing import cast
 
+from ..effect import Effect
 from ..flow import AgentFlow
 from ._utils import JsonValue, freeze_json_object
 from .caching import CacheMode, PromptCachePolicy
@@ -352,23 +353,33 @@ class Conversation:
         message: str | PromptTemplate | Message,
         *,
         max_model_rounds: int | None = None,
+        input_poll: Effect[tuple[Message, ...]] | None = None,
     ) -> AgentFlow[ModelTurnResult]:
         """Validate one user input and return its transactional agent flow.
 
         Calling this method does not acquire the facade. The busy lifecycle
         begins when the returned generator is first advanced and ends when it
         returns, raises, or is closed.
+
+        When supplied, ``input_poll`` is executed before each request and after
+        each response. The application owns admission and returns all currently
+        available user messages without waiting for future input. The same
+        effect is reused serially; failures abort this transaction. New input
+        extends this turn without resetting its round limit or cancelling tools
+        already returned by the model. After a tool response, received input is
+        placed after the matching tool results in the outgoing transcript.
         """
 
         user_message = _normalize_user_message(message)
         rounds = self._max_model_rounds if max_model_rounds is None else max_model_rounds
         validate_max_model_rounds(rounds)
-        return self._ask_flow(user_message, rounds)
+        return self._ask_flow(user_message, rounds, input_poll)
 
     def _ask_flow(
         self,
         user_message: Message,
         max_model_rounds: int,
+        input_poll: Effect[tuple[Message, ...]] | None,
     ) -> AgentFlow[ModelTurnResult]:
         """Own the busy flag, prompt session, and atomic commit for one turn."""
 
@@ -402,6 +413,7 @@ class Conversation:
                 metadata=self._metadata,
                 provider_options=self._provider_options,
                 request_budget=self._request_budget,
+                input_poll=input_poll,
             )
 
             # Commit only the state returned after the final model response and

@@ -7,12 +7,15 @@ at every orchestration hand-off.
 
 from __future__ import annotations
 
+from collections import deque
 from dataclasses import FrozenInstanceError
 from typing import cast
 
 import pytest
 
+from purrcept_core.context import ExecutionContext
 from purrcept_core.driver import AgentDriver
+from purrcept_core.effect import Effect
 from purrcept_core.events import EffectFailed, EffectStarted, EffectSucceeded
 from purrcept_core.executor import InlineExecutor
 from purrcept_core.models.backend import ModelEventSink
@@ -60,6 +63,79 @@ class SequenceBackend:
         if isinstance(outcome, BaseException):
             raise outcome
         return outcome
+
+
+class InputPoll(Effect[tuple[Message, ...]]):
+    """Return deterministic arrival snapshots at real model-loop boundaries."""
+
+    def __init__(self, batches: list[tuple[Message, ...]]) -> None:
+        self.batches = deque(batches)
+        self.calls = 0
+
+    async def execute(self, context: ExecutionContext[object]) -> tuple[Message, ...]:
+        """Consume one snapshot without waiting for future arrivals."""
+        self.calls += 1
+        return self.batches.popleft() if self.batches else ()
+
+
+async def test_input_after_stop_continues_same_turn_and_commits_real_history() -> None:
+    backend = SequenceBackend([_final_response("first"), _final_response("second")])
+    conversation = Conversation(Model(backend, "test"))
+    poll = InputPoll([(), (Message.user("new arrival"),)])
+    result = await AgentDriver(InlineExecutor()).run(
+        conversation.ask("initial", input_poll=poll), host=None
+    )
+    assert result.model_rounds == 2 and conversation.turn_index == 1
+    assert [message.text for message in backend.requests[1].messages] == [
+        "initial",
+        "first",
+        "new arrival",
+    ]
+    assert [message.text for message in conversation.messages] == [
+        "initial",
+        "first",
+        "new arrival",
+        "second",
+    ]
+
+
+async def test_response_intake_precedes_tools_without_revoking_returned_calls() -> None:
+    poll = InputPoll([(), (Message.user("during generation"),)])
+    executed: list[str] = []
+
+    def act() -> str:
+        """Perform one irreversible effect selected before the latest input."""
+        assert poll.calls == 2
+        executed.append("actual")
+        poll.batches.append((Message.user("during tool"),))
+        return "receipt"
+
+    backend = SequenceBackend(
+        [_tool_response(ToolCallBlock("call", "act", arguments={})), _final_response()]
+    )
+    conversation = Conversation(Model(backend, "test"), tools=(act,))
+    await AgentDriver(InlineExecutor()).run(conversation.ask("initial", input_poll=poll), host=None)
+    assert executed == ["actual"]
+    messages = backend.requests[1].messages
+    assert [message.role for message in messages] == [
+        MessageRole.USER,
+        MessageRole.ASSISTANT,
+        MessageRole.TOOL,
+        MessageRole.USER,
+        MessageRole.USER,
+    ]
+    assert [message.text for message in messages[-2:]] == ["during generation", "during tool"]
+
+
+async def test_new_input_at_round_limit_does_not_reset_budget_or_commit_unanswered_input() -> None:
+    backend = SequenceBackend([_final_response()])
+    conversation = Conversation(Model(backend, "test"), max_model_rounds=1)
+    poll = InputPoll([(), (Message.user("too late"),)])
+    with pytest.raises(ToolLoopLimitError):
+        await AgentDriver(InlineExecutor()).run(
+            conversation.ask("initial", input_poll=poll), host=None
+        )
+    assert len(backend.requests) == 1 and conversation.messages == ()
 
 
 def _tool_response(
